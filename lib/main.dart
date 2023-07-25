@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:news_app/data/cubits/all_news_cubit/cubit/all_news_cubit.dart';
 import 'package:news_app/screens/home_screen.dart';
 
 void main() {
@@ -10,13 +12,18 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'News App',
-      theme: ThemeData(
-        primarySwatch: Colors.red,
+    return MultiBlocProvider(
+      providers: [BlocProvider<AllNewsCubit>(
+          create: (context) => AllNewsCubit(),
+        ),],
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        title: 'News App',
+        theme: ThemeData(
+          primarySwatch: Colors.red,
+        ),
+        home: const Home(),
       ),
-      home: const Home(),
     );
   }
 }

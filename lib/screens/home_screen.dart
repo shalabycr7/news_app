@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:news_app/data/cubits/all_news_cubit/cubit/all_news_cubit.dart';
 import 'package:news_app/data/data.dart';
+import 'package:news_app/data/repositories/all_news_repo.dart';
 import 'package:news_app/screens/news_details_screen.dart';
 import 'package:news_app/shared/news_card.dart';
 
@@ -72,13 +75,23 @@ class Home extends StatelessWidget {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      "Latest News",
-                      style: GoogleFonts.lora(
-                        fontSize: 19,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black,
-                      ),
+                    Row(
+                      children: [
+                        Text(
+                          "Latest News",
+                          style: GoogleFonts.lora(
+                            fontSize: 19,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black,
+                          ),
+                        ),
+                        IconButton(
+                            onPressed: () {
+                              AllNewsRepo().getAllNews();
+                              context.read<AllNewsCubit>().getAllNews();
+                            },
+                            icon: const Icon(Icons.refresh_outlined))
+                      ],
                     ),
                     Row(
                       children: [
@@ -114,14 +127,32 @@ class Home extends StatelessWidget {
                 ),
               ),
               Expanded(
-                child: ListView.builder(
-                  itemCount: images.length,
-                  itemBuilder: (context, index) {
-                    return CardImage(
-                      image: images[index],
-                      title: title[index],
-                      bottom: bottom[index],
-                    );
+                child: BlocBuilder<AllNewsCubit, AllNewsState>(
+                  builder: (context, state) {
+                    if (state is AllNewsInitial) {
+                      return const Center(
+                        child: Text("press above button to get all news "),
+                      );
+                    } else if (state is AllNewsLoading) {
+                      return const Center(
+                        child: CircularProgressIndicator(),
+                      );
+                    } else if (state is AllNewsSuccess) {
+                      return ListView.builder(
+                        itemCount: images.length,
+                        itemBuilder: (context, index) {
+                          return CardImage(
+                            image: images[index],
+                            title: state.finalData.articles![index].title!,
+                            bottom: bottom[index],
+                          );
+                        },
+                      );
+                    } else {
+                      return const Center(
+                        child: Text("Error"),
+                      );
+                    }
                   },
                 ),
               ),
